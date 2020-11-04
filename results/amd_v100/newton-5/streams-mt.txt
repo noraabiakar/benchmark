@@ -1,0 +1,225 @@
+array_size          = 1048576
+array_size per task = 1048576
+epochs              = 32
+repetitions         = 10
+slots               = 1
+kernels_per_slots   = 1
+block_dim           = 128
+grid_dim            = 8192
+7.31852e+06,7.16749e+06,7.1352e+06,7.15486e+06,7.14936e+06,7.1259e+06,7.13953e+06,7.13632e+06,7.13626e+06,7.13976e+06,
+array_size          = 1048576
+array_size per task = 524288
+epochs              = 32
+repetitions         = 10
+slots               = 1
+kernels_per_slots   = 2
+block_dim           = 128
+grid_dim            = 4096
+7.58095e+06,7.35701e+06,7.38264e+06,7.37741e+06,7.37907e+06,7.38306e+06,7.38002e+06,7.38936e+06,7.40271e+06,7.36788e+06,
+array_size          = 1048576
+array_size per task = 262144
+epochs              = 32
+repetitions         = 10
+slots               = 1
+kernels_per_slots   = 4
+block_dim           = 128
+grid_dim            = 2048
+7.91347e+06,7.76861e+06,7.77845e+06,7.78569e+06,7.79372e+06,7.77607e+06,7.77294e+06,7.8069e+06,7.78267e+06,7.80967e+06,
+array_size          = 1048576
+array_size per task = 131072
+epochs              = 32
+repetitions         = 10
+slots               = 1
+kernels_per_slots   = 8
+block_dim           = 128
+grid_dim            = 1024
+8.87092e+06,8.74706e+06,8.73513e+06,8.75335e+06,8.7542e+06,8.74726e+06,8.76487e+06,8.77238e+06,8.74344e+06,8.72295e+06,
+array_size          = 1048576
+array_size per task = 65536
+epochs              = 32
+repetitions         = 10
+slots               = 1
+kernels_per_slots   = 16
+block_dim           = 128
+grid_dim            = 512
+1.03651e+07,1.02355e+07,1.02491e+07,1.02512e+07,1.02188e+07,1.02372e+07,1.02142e+07,1.02564e+07,1.02345e+07,1.02269e+07,
+array_size          = 1048576
+array_size per task = 524288
+epochs              = 32
+repetitions         = 10
+slots               = 2
+kernels_per_slots   = 1
+block_dim           = 128
+grid_dim            = 4096
+7.34078e+06,7.20566e+06,7.19965e+06,7.19482e+06,7.19685e+06,7.20405e+06,7.17682e+06,7.18472e+06,7.20192e+06,7.16601e+06,
+array_size          = 1048576
+array_size per task = 262144
+epochs              = 32
+repetitions         = 10
+slots               = 2
+kernels_per_slots   = 2
+block_dim           = 128
+grid_dim            = 2048
+7.42993e+06,7.19067e+06,7.23716e+06,7.21196e+06,7.18314e+06,7.20227e+06,7.17911e+06,7.22678e+06,7.20661e+06,7.19312e+06,
+array_size          = 1048576
+array_size per task = 131072
+epochs              = 32
+repetitions         = 10
+slots               = 2
+kernels_per_slots   = 4
+block_dim           = 128
+grid_dim            = 1024
+7.75489e+06,7.47763e+06,7.58219e+06,7.48194e+06,7.4921e+06,7.55468e+06,7.55598e+06,7.44383e+06,7.54652e+06,7.51308e+06,
+array_size          = 1048576
+array_size per task = 65536
+epochs              = 32
+repetitions         = 10
+slots               = 2
+kernels_per_slots   = 8
+block_dim           = 128
+grid_dim            = 512
+8.61085e+06,8.41108e+06,8.38404e+06,8.47289e+06,8.48496e+06,8.40693e+06,8.4352e+06,8.45512e+06,8.47081e+06,8.41001e+06,
+array_size          = 1048576
+array_size per task = 32768
+epochs              = 32
+repetitions         = 10
+slots               = 2
+kernels_per_slots   = 16
+block_dim           = 128
+grid_dim            = 256
+1.09542e+07,1.07592e+07,1.08952e+07,1.07311e+07,1.07952e+07,1.09611e+07,1.07366e+07,1.07268e+07,1.0803e+07,1.07712e+07,
+array_size          = 1048576
+array_size per task = 262144
+epochs              = 32
+repetitions         = 10
+slots               = 4
+kernels_per_slots   = 1
+block_dim           = 128
+grid_dim            = 2048
+7.7499e+06,7.21656e+06,7.20619e+06,7.19104e+06,7.21005e+06,7.18558e+06,7.20339e+06,7.20029e+06,7.17256e+06,7.18932e+06,
+array_size          = 1048576
+array_size per task = 131072
+epochs              = 32
+repetitions         = 10
+slots               = 4
+kernels_per_slots   = 2
+block_dim           = 128
+grid_dim            = 1024
+7.66404e+06,7.22597e+06,7.26014e+06,7.2058e+06,7.23923e+06,7.20954e+06,7.22277e+06,7.30868e+06,7.28398e+06,7.20752e+06,
+array_size          = 1048576
+array_size per task = 65536
+epochs              = 32
+repetitions         = 10
+slots               = 4
+kernels_per_slots   = 4
+block_dim           = 128
+grid_dim            = 512
+8.29954e+06,7.6738e+06,7.6411e+06,7.61749e+06,7.69186e+06,7.60211e+06,7.6369e+06,7.70944e+06,7.72208e+06,7.75007e+06,
+array_size          = 1048576
+array_size per task = 32768
+epochs              = 32
+repetitions         = 10
+slots               = 4
+kernels_per_slots   = 8
+block_dim           = 128
+grid_dim            = 256
+9.39683e+06,9.06153e+06,9.1152e+06,9.10757e+06,9.00957e+06,8.88475e+06,9.13899e+06,8.96414e+06,9.18451e+06,9.14712e+06,
+array_size          = 1048576
+array_size per task = 16384
+epochs              = 32
+repetitions         = 10
+slots               = 4
+kernels_per_slots   = 16
+block_dim           = 128
+grid_dim            = 128
+1.41228e+07,1.37397e+07,1.37235e+07,1.35674e+07,1.37142e+07,1.38054e+07,1.35026e+07,1.37706e+07,1.37847e+07,1.35481e+07,
+array_size          = 1048576
+array_size per task = 131072
+epochs              = 32
+repetitions         = 10
+slots               = 8
+kernels_per_slots   = 1
+block_dim           = 128
+grid_dim            = 1024
+1.83002e+07,1.80416e+07,1.8069e+07,1.80689e+07,1.82025e+07,1.8001e+07,1.84637e+07,1.8059e+07,1.81258e+07,1.79729e+07,
+array_size          = 1048576
+array_size per task = 65536
+epochs              = 32
+repetitions         = 10
+slots               = 8
+kernels_per_slots   = 2
+block_dim           = 128
+grid_dim            = 512
+1.81725e+07,1.77751e+07,1.80575e+07,1.78354e+07,1.78641e+07,1.8063e+07,1.76652e+07,1.81314e+07,1.78144e+07,1.78119e+07,
+array_size          = 1048576
+array_size per task = 32768
+epochs              = 32
+repetitions         = 10
+slots               = 8
+kernels_per_slots   = 4
+block_dim           = 128
+grid_dim            = 256
+1.89799e+07,1.88125e+07,1.902e+07,1.86907e+07,1.88716e+07,1.87778e+07,1.88858e+07,1.90806e+07,1.89387e+07,1.9128e+07,
+array_size          = 1048576
+array_size per task = 16384
+epochs              = 32
+repetitions         = 10
+slots               = 8
+kernels_per_slots   = 8
+block_dim           = 128
+grid_dim            = 128
+2.14419e+07,2.03566e+07,2.09691e+07,2.07844e+07,2.05592e+07,2.03591e+07,2.04663e+07,2.10535e+07,2.11253e+07,2.11473e+07,
+array_size          = 1048576
+array_size per task = 8192
+epochs              = 32
+repetitions         = 10
+slots               = 8
+kernels_per_slots   = 16
+block_dim           = 128
+grid_dim            = 64
+2.63108e+07,2.61987e+07,2.57e+07,2.5817e+07,2.59869e+07,2.62008e+07,2.63365e+07,2.60891e+07,2.63035e+07,2.60845e+07,
+array_size          = 1048576
+array_size per task = 65536
+epochs              = 32
+repetitions         = 10
+slots               = 16
+kernels_per_slots   = 1
+block_dim           = 128
+grid_dim            = 512
+4.29786e+07,4.31457e+07,4.34899e+07,4.30038e+07,4.32923e+07,4.33968e+07,4.3522e+07,4.31437e+07,4.30719e+07,4.37592e+07,
+array_size          = 1048576
+array_size per task = 32768
+epochs              = 32
+repetitions         = 10
+slots               = 16
+kernels_per_slots   = 2
+block_dim           = 128
+grid_dim            = 256
+4.34269e+07,4.30988e+07,4.27498e+07,4.30823e+07,4.30194e+07,4.31375e+07,4.36075e+07,4.34506e+07,4.33708e+07,4.33898e+07,
+array_size          = 1048576
+array_size per task = 16384
+epochs              = 32
+repetitions         = 10
+slots               = 16
+kernels_per_slots   = 4
+block_dim           = 128
+grid_dim            = 128
+4.38356e+07,4.36377e+07,4.38201e+07,4.44688e+07,4.3488e+07,4.39751e+07,4.35261e+07,4.34787e+07,4.39058e+07,4.4181e+07,
+array_size          = 1048576
+array_size per task = 8192
+epochs              = 32
+repetitions         = 10
+slots               = 16
+kernels_per_slots   = 8
+block_dim           = 128
+grid_dim            = 64
+4.61561e+07,4.56747e+07,4.66462e+07,4.67349e+07,4.69987e+07,4.584e+07,4.64279e+07,4.53227e+07,4.59858e+07,4.65541e+07,
+array_size          = 1048576
+array_size per task = 4096
+epochs              = 32
+repetitions         = 10
+slots               = 16
+kernels_per_slots   = 16
+block_dim           = 128
+grid_dim            = 32
+5.63759e+07,5.58848e+07,5.6215e+07,5.63182e+07,5.58921e+07,5.55934e+07,5.71837e+07,5.69382e+07,5.76528e+07,5.61846e+07,

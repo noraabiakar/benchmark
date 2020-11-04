@@ -1,0 +1,5 @@
+#pragma once
+
+__global__ void empty(size_t n);
+__global__ void axpy(double *y, double* x, double alpha, size_t n);
+__global__ void newton(size_t n_iter, double *x, size_t n);

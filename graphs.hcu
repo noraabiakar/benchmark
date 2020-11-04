@@ -1,0 +1,193 @@
+#include "util.hpp"
+
+#include "kernels.hcu"
+
+#define cuda_api(f, ...) do { check_status(f(__VA_ARGS__)); } while (0)
+
+cudaGraphNode_t add_empty_node(cudaGraph_t& graph) {
+    cudaGraphNode_t node = {0};
+    cuda_api(cudaGraphAddEmptyNode, &node, graph, nullptr, 0);
+    return node;
+}
+
+template<typename K, typename... As>
+cudaGraphNode_t add_kernel_node(cudaGraph_t& graph, const benchmark_parameters& p, K kernel, As... as) {
+    std::vector<void*> args{&as...};
+    cudaGraphNode_t node = {0};
+    cudaKernelNodeParams params = {0};
+    params.func           = (void*) kernel;
+    params.gridDim        = p.grid_dim;
+    params.blockDim       = p.block_dim;
+    params.sharedMemBytes = 0;
+    params.kernelParams   = (void**) args.data();
+    params.extra          = nullptr;
+    cuda_api(cudaGraphAddKernelNode, &node, graph, nullptr, 0, &params);
+    return node;
+}
+
+void add_dependencies(cudaGraph_t& graph, const cudaGraphNode_t& from, const cudaGraphNode_t& to) {
+    cuda_api(cudaGraphAddDependencies, graph, &from, &to, 1);
+}
+
+void add_dependencies(cudaGraph_t& graph, const cudaGraphNode_t& from_, const std::vector<cudaGraphNode_t>& to) {
+    auto n = to.size();
+    std::vector<cudaGraphNode_t> from(n, from_);
+    cuda_api(cudaGraphAddDependencies, graph, from.data(), to.data(), n);
+}
+
+void add_dependencies(cudaGraph_t& graph, const std::vector<cudaGraphNode_t>& from, const cudaGraphNode_t& to_) {
+    auto n = from.size();
+    std::vector<cudaGraphNode_t> to(n, to_);
+    cuda_api(cudaGraphAddDependencies, graph, from.data(), to.data(), n);
+}
+
+void add_dependencies(cudaGraph_t& graph, const std::vector<cudaGraphNode_t>& from, const std::vector<cudaGraphNode_t>& to) {
+    assert(to.size() == from.size());
+    cuda_api(cudaGraphAddDependencies, graph, from.data(), to.data(), to.size());
+}
+
+// Construct a graph consisting of `epochs` fork/join pairs. Each pair is a
+// dummy node followed by a fan-out to `slots` concurrent kernel streams of
+// `kernels_per_slot` kernels per stream, followed by a fan-in into a dummy node.
+template<typename K, typename... As>
+auto make_graph(const benchmark_parameters& p, K func, As... as) {
+    cudaGraph_t graph = {0};
+    cuda_api(cudaGraphCreate, &graph, 0);
+
+    // Create initial fan-out dummy
+    auto last = add_empty_node(graph);
+
+    for (auto epoch = 0ul; epoch < p.epochs; ++epoch) {
+        // last row of `slots` kernels
+        std::vector<cudaGraphNode_t> old_nodes;
+        for (auto kernel = 0ul; kernel < p.kernels_per_slot; ++kernel) {
+            // add a row of `slots` kernels
+            std::vector<cudaGraphNode_t> nodes;
+            for (auto slot = 0ul; slot < p.slots; ++slot) {
+                auto kernel_idx = slot + kernel*p.slots;
+                auto node = add_kernel_node(graph, p, func, offset_and_forward(as, p.array_size_per_kernel, kernel_idx)...);
+                nodes.push_back(std::move(node));
+            }
+            // At the beginning of an epoch all kernels depend on the fan-out
+            if (kernel == 0ul) {
+                add_dependencies(graph, last, nodes);
+                old_nodes = nodes;
+                continue;
+            }
+            // Anywhere in between the current row depends on the last row
+            add_dependencies(graph, old_nodes, nodes);
+            old_nodes = nodes;
+        }
+	// At the of end an epoch all kernels join into a new dummy node
+	last = add_empty_node(graph);
+	add_dependencies(graph, old_nodes, last);
+    }
+    return graph;
+}
+
+template<typename K, typename... As>
+auto bench_graph(const benchmark_parameters& p, K kernel, As... as) {
+    auto graph = make_graph(p, kernel, as...);
+    cudaStream_t stream = {0};
+    cuda_api(cudaStreamCreate, &stream);
+    cudaGraphExec_t instance = {0};
+    check_status(cudaGraphInstantiate(&instance, graph, nullptr, nullptr, 0));
+    std::vector<double> res;
+    for (auto rep = 0; rep < p.repetitions; ++rep) {
+        auto t0 = timer::now();
+        device_synch();
+        check_status(cudaGraphLaunch(instance, stream));
+        device_synch();
+        auto t1 = timer::now();
+        res.push_back(delta_t(t0, t1));
+    }
+    cuda_api(cudaGraphExecDestroy, instance);
+    cuda_api(cudaGraphDestroy, graph);
+    cuda_api(cudaStreamDestroy, stream);
+    return res;
+}
+
+template<typename K, typename... As>
+auto bench_graph_update(const benchmark_parameters& p, K kernel, As... as) {
+    auto graph = make_graph(p, kernel, as...);
+    cudaStream_t stream = {0};
+    cuda_api(cudaStreamCreate, &stream);
+    cudaGraphExec_t instance = {0};
+    cuda_api(cudaGraphInstantiate, &instance, graph, nullptr, nullptr, 0);
+    std::vector<double> res;
+    for (auto rep = 0; rep < p.repetitions; ++rep) {
+        auto update = make_graph(p, kernel, as...);
+        cudaGraphNode_t error_node;
+        cudaGraphExecUpdateResult update_result;
+        cuda_api(cudaGraphExecUpdate, instance, update, &error_node, &update_result);
+        cuda_api(cudaGraphDestroy, update);
+        auto t0 = timer::now();
+        device_synch();
+        cuda_api(cudaGraphLaunch, instance, stream);
+        device_synch();
+        auto t1 = timer::now();
+        res.push_back(delta_t(t0, t1));
+    }
+    cuda_api(cudaGraphExecDestroy, instance);
+    cuda_api(cudaGraphDestroy, graph);
+    cuda_api(cudaStreamDestroy, stream);
+    return res;
+}
+
+template<typename K, typename... As>
+auto bench_graph_split(const benchmark_parameters& p, K kernel, As... as) {
+    auto q = p; q.epochs = 1;
+    auto graph = make_graph(q, kernel, as...);
+    cudaStream_t stream = {0};
+    cuda_api(cudaStreamCreate, &stream);
+    cudaGraphExec_t instance = {0};
+    cuda_api(cudaGraphInstantiate, &instance, graph, nullptr, nullptr, 0);
+    std::vector<double> res;
+    for (auto rep = 0; rep < p.repetitions; ++rep) {
+        auto t0 = timer::now();
+        device_synch();
+        for (auto epoch = 0ul; epoch < p.epochs; ++epoch) {
+            cuda_api(cudaGraphLaunch, instance, stream);
+        }
+        device_synch();
+        auto t1 = timer::now();
+        res.push_back(delta_t(t0, t1));
+    }
+    cuda_api(cudaGraphExecDestroy, instance);
+    cuda_api(cudaGraphDestroy, graph);
+    cuda_api(cudaStreamDestroy, stream);
+
+    return res;
+}
+
+template<typename K, typename... As>
+auto bench_graph_split_update(const benchmark_parameters& p, K kernel, As... as) {
+    auto q = p; q.epochs = 1;
+    auto graph = make_graph(q, kernel, as...);
+
+    cudaStream_t stream = {0};
+    cuda_api(cudaStreamCreate, &stream);
+    cudaGraphExec_t instance = {0};
+    cuda_api(cudaGraphInstantiate, &instance, graph, nullptr, nullptr, 0);
+    std::vector<double> res;
+    for (auto rep = 0; rep < p.repetitions; ++rep) {
+        auto t0 = timer::now();
+        device_synch();
+        for (auto epoch = 0ul; epoch < p.epochs; ++epoch) {
+            cudaGraphNode_t error_node;
+            cudaGraphExecUpdateResult update_result;
+	    auto update = make_graph(q, kernel, as...);
+            cuda_api(cudaGraphExecUpdate, instance, update, &error_node, &update_result);
+            cuda_api(cudaGraphDestroy, update);
+            cuda_api(cudaGraphLaunch, instance, stream);
+        }
+        device_synch();
+        auto t1 = timer::now();
+        res.push_back(delta_t(t0, t1));
+    }
+    cuda_api(cudaGraphExecDestroy, instance);
+    cuda_api(cudaGraphDestroy, graph);
+    cuda_api(cudaStreamDestroy, stream);
+
+    return res;
+}

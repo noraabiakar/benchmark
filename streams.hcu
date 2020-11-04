@@ -1,0 +1,62 @@
+#include "util.hpp"
+#include "threading.hpp"
+#include "kernels.hcu"
+
+template<typename K, typename... As>
+auto bench_streams_st(const benchmark_parameters& p, K kernel, As... as) {
+    std::vector<cudaStream_t> streams{p.slots, 0};
+    for (auto& stream: streams) cudaStreamCreate(&stream);
+
+    auto thread_runner = [&](unsigned stream_idx) {
+        for (unsigned k = 0; k < p.kernels_per_slot; ++k) {
+            unsigned kernel_idx   = k + stream_idx * p.kernels_per_slot;
+            kernel<<<p.grid_dim, p.block_dim, 0, streams[stream_idx]>>>(offset_and_forward(as, p.array_size_per_kernel, kernel_idx)...);
+        }
+    };
+
+    std::vector<double> res;
+    for (unsigned repetition = 0; repetition < p.repetitions; ++repetition) {
+        auto t0 = timer::now();
+        device_synch();
+	for (unsigned i = 0; i < p.epochs; ++i) {
+           for (unsigned stream_idx = 0; stream_idx < p.slots; ++stream_idx) {
+                thread_runner(stream_idx);
+            }
+	}
+        device_synch();
+        auto t1 = timer::now();
+        res.push_back(delta_t(t0, t1));
+    }
+
+    for (auto& stream: streams) cudaStreamDestroy(stream);
+    return res;
+}
+
+template<typename K, typename... As>
+auto bench_streams_mt(const benchmark_parameters& p, K kernel, As... as) {
+    std::vector<cudaStream_t> streams{p.slots, 0};
+    for (auto& stream: streams) cudaStreamCreate(&stream);
+
+    auto thread_runner = [&](unsigned stream_idx) {
+        for (unsigned k = 0; k < p.kernels_per_slot; ++k) {
+            unsigned kernel_idx   = k + stream_idx * p.kernels_per_slot;
+            kernel<<<p.grid_dim, p.block_dim, 0, streams[stream_idx]>>>(offset_and_forward(as, p.array_size_per_kernel, kernel_idx)...);
+        }
+    };
+
+    std::vector<double> res;
+    for (unsigned repetition = 0; repetition < p.repetitions; ++repetition) {
+    	threading::task_system ts(p.slots);
+        auto t0 = timer::now();
+	device_synch();
+	for (unsigned i = 0; i < p.epochs; ++i) {
+	  threading::parallel_for::apply(0, p.slots, &ts, [&](int i) {thread_runner(i);});
+	}
+	device_synch();
+	auto t1 = timer::now();
+	res.push_back(delta_t(t0, t1));
+    }
+
+    for (auto& stream: streams) cudaStreamDestroy(stream);
+    return res;
+}
